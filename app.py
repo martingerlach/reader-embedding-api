@@ -16,11 +16,12 @@ CUSTOM_UA = 'reader session app -- mgerlach@wikimedia.org'
 languages = requests.get('https://cxserver.wikimedia.org/v1/languagepairs').json()['source']
 
 ## load embedding
-PATH_EMBEDDING = os.path.join('data/embedding.bin')
+# PATH_EMBEDDING = os.path.join('data/embedding.bin')
+PATH_EMBEDDING = os.path.join('data/large/embedding.bin')
 FT_MODEL = fasttext.load_model(PATH_EMBEDDING)
 VOCAB = FT_MODEL.get_words()
 print("Try: http://127.0.0.1:5000/api/v1/reader/nn?qid=Q81068910")
-print("or : http://127.0.0.1:5000/api/v1/reader/nn?qid=Q81068910&n=12&lang=en|de&filter=corona|covid&threshold=0.8&showurl=True")
+print("or : http://127.0.0.1:5000/api/v1/reader/nn?qid=Q81068910&n=20&lang=en|de&filter=corona|covid&threshold=0.5&showurl=True")
 
 @app.route('/')
 def index():
@@ -38,18 +39,30 @@ def get_recommendations():
 
     if validate_qid_format(qid) and validate_qid_model(qid):
         result = recommend(qid,nn = n, threshold = threshold)
+        print(len(result))
         ## add label and titles for some wikis
         result = add_article_titles(result,list_wikis=lang)
+        print(len(result))
+
         ##filters
         result = filter_items_notext(result)
+        print(len(result))
+
         result = filter_items_disambiguation(result)
+        print(len(result))
+
         result = filter_items_str(result,list_keywords = filterStr)
+        print(len(result))
+
         ## add urls for easier access
         if showUrl == True:
             result = add_urlsToTitles(result)
+        print(len(result))
 
         ## keep only some specific fields
         result_formatted = [ {'qid': r['qid'], 'label':r['label'], 'score':r['score'], 'articles':r['titles'],  }  for r in result]
+        print(len(result))
+
         return jsonify(result_formatted)
     return jsonify({'Error':qid})
 
@@ -125,12 +138,13 @@ def recommend(qid, nn = 10, list_wikis= ['enwiki'], threshold = 0.):
 
     return result
 
-def add_article_titles(list_neighbors, n_batch = 20, list_wikis = ['enwiki']):
+def add_article_titles(list_items, n_batch = 20, list_wikis = ['enwiki']):
     api_url_base = ' https://wikidata.org/w/api.php'
-    list_qids = [h['qid'] for h in list_neighbors]
+    list_qids = [h['qid'] for h in list_items]
     list_qids_split = np.array_split(list_qids,math.ceil(len(list_qids)/n_batch))
     
     i_qid=0
+    list_items_new = list_items.copy()
     for list_qids_batch in list_qids_split:
         
         params = {
@@ -151,17 +165,17 @@ def add_article_titles(list_neighbors, n_batch = 20, list_wikis = ['enwiki']):
             for wiki_sel in list_wikis:
                 title_sel = result['entities'].get(qid_sel,{}).get('sitelinks',{}).get(wiki_sel,{}).get('title','-').replace(' ','_')
                 dict_title[wiki_sel]=title_sel
-            list_neighbors[i_qid]['titles'] = dict_title
+            list_items_new[i_qid]['titles'] = dict_title
             
             ##get label+description (english)
             label = result['entities'].get(qid_sel,{}).get('labels',{}).get('en',{}).get('value','-')
-            list_neighbors[i_qid]['label'] = label
+            list_items_new[i_qid]['label'] = label
             description = result['entities'].get(qid_sel,{}).get('description',{}).get('en',{}).get('value','-')
-            list_neighbors[i_qid]['description'] = description
+            list_items_new[i_qid]['description'] = description
 
             i_qid+=1
 
-    return list_neighbors
+    return list_items_new
 
 def add_urlsToTitles(list_items):
     list_items_new = []
@@ -193,6 +207,7 @@ def filter_items_notext(list_items):
         for wiki, title in titles.items():
             if title != '-':
                 list_items_new += [item]
+                break
     return list_items_new
 
 def filter_items_disambiguation(
