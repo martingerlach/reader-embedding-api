@@ -39,29 +39,19 @@ def get_recommendations():
 
     if validate_qid_format(qid) and validate_qid_model(qid):
         result = recommend(qid,nn = n, threshold = threshold)
-        print(len(result))
         ## add label and titles for some wikis
         result = add_article_titles(result,list_wikis=lang)
-        print(len(result))
-
         ##filters
         result = filter_items_notext(result)
-        print(len(result))
-
         result = filter_items_disambiguation(result)
-        print(len(result))
-
         result = filter_items_str(result,list_keywords = filterStr)
-        print(len(result))
 
         ## add urls for easier access
         if showUrl == True:
             result = add_urlsToTitles(result)
-        print(len(result))
 
         ## keep only some specific fields
         result_formatted = [ {'qid': r['qid'], 'label':r['label'], 'score':r['score'], 'articles':r['titles'],  }  for r in result]
-        print(len(result))
 
         return jsonify(result_formatted)
     return jsonify({'Error':qid})
