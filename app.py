@@ -16,8 +16,8 @@ CUSTOM_UA = 'reader session app -- mgerlach@wikimedia.org'
 languages = requests.get('https://cxserver.wikimedia.org/v1/languagepairs').json()['source']
 
 ## load embedding
-# PATH_EMBEDDING = os.path.join('data/embedding.bin')
-PATH_EMBEDDING = os.path.join('data/large/embedding.bin')
+PATH_EMBEDDING = os.path.join('data/embedding.bin')
+# PATH_EMBEDDING = os.path.join('data/large/embedding.bin')
 FT_MODEL = fasttext.load_model(PATH_EMBEDDING)
 VOCAB = FT_MODEL.get_words()
 print("Try: http://127.0.0.1:5000/api/v1/reader/nn?qid=Q81068910")
