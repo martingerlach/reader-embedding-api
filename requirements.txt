@@ -1,3 +1,4 @@
+wheel
 fasttext
 numpy
 requests
