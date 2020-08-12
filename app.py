@@ -84,10 +84,7 @@ def parse_args(request):
     ## pass arguments
     args = {    'qid': qid,
                 'n': n,
-                'lang':wikis,
                 'threshold': float(threshold),
-                'showurl':showUrl,
-                'filter':filterStr
             }
 
     return args
