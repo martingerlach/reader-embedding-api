@@ -136,10 +136,8 @@ def recommend(qid, nn = 10, threshold = 0.):
         "format": "json",
     }
     recs = requests.get( api_url_base,params=params).json()
-    result = [{'qid':qid,'score':1.}]
-    result += [r for r in recs if r['score']>0.2]
-
-
+    ## add the other items if they exceed the threshold
+    result = [r for r in recs if r['score']>threshold]
     return result
 
 def add_article_titles(list_items, n_batch = 20, list_wikis = ['enwiki']):
