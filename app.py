@@ -67,7 +67,7 @@ def parse_args(request):
     """
     ## number of neighbors
     n_default = 10 ## default number of neighbors
-    n_max = 1000 ## maximum number of numbers (even if submitted argument is larger)
+    n_max = 100 ## maximum number of numbers (even if submitted argument is larger)
     n = request.args.get('n',n_default)
     try:
         n = min(int(n), n_max)
