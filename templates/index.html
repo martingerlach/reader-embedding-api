@@ -44,7 +44,7 @@
 					</div>
 					<div class="description padded--right">
 						<p>	This tool aims to help identifying articles in Wikipedia related to a given topic. For example, a person interested in <a href="https://en.wikipedia.org/wiki/Climate_change">Climate change</a> would want to get a list of articles that are related to that topic.</p>
-						<p> Existing approaches to this problem typically look at the text or the links in a wiki (such as the  <a href="https://www.mediawiki.org/wiki/Help:CirrusSearch#Morelike">morelike</a>-search). In this approach we generate the list of related articles based on their relevance to readers of Wikipedia. Specifically, using data from traffic on Wikipedia and methods from machine learning, we try to identify those articles that are read in the context of the topic of interest.</p>
+						<p> Existing approaches to this problem typically look at the text or the links in a wiki (such as the  <a href="https://www.mediawiki.org/wiki/Help:CirrusSearch#Morelike">morelike</a>-search). Here, in contrast we generate the list of related articles based on their relevance to readers of Wikipedia. Specifically, using data from traffic on Wikipedia and methods from machine learning, we try to identify those articles that are read in the context of the topic of interest.</p>
 				  		<p>One of the main advantages of this approach is that it is independent of any language. This works by mapping articles to their corresponding Wikidata-item (<a href="https://github.com/martingerlach/coverage-wikipedia-wikidata">almost all of them</a> have a Wikidata item ). This allows us to aggregate articles from all wikis. More details can be found <a href="https://meta.wikimedia.org/wiki/User:MGerlach_(WMF)/covid_related_pages_reading_sessions">here</a>.</p>
 
 						<p>You can try this tool below.</p> 
@@ -164,8 +164,8 @@
 		}
 
 		function queryWikidataBasedAPI() {
-			// var queryUrl = "https://reader.toolforge.org/api/v1/reader/nn?qid=" + document.getElementById('wikidata-id').value+"&lang=" + document.getElementById('lang').value;
-			var queryUrl = "http://127.0.0.1:5000/api/v1/reader/nn?qid=" + document.getElementById('wikidata-id').value+"&lang=" + document.getElementById('lang').value;
+			var queryUrl = "https://reader.toolforge.org/api/v1/reader/nn?qid=" + document.getElementById('wikidata-id').value+"&lang=" + document.getElementById('lang').value;
+			// var queryUrl = "http://127.0.0.1:5000/api/v1/reader/nn?qid=" + document.getElementById('wikidata-id').value+"&lang=" + document.getElementById('lang').value;
 			$.ajax(queryUrl, {success: render_categories_wd.bind(this),
 							  error: function(jqxmlhr, status, error){console.log(status + ": " + error)}
 							  }
