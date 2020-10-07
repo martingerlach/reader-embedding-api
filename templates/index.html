@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>Reader embedding access</title>
+	<link rel="shortcut icon" href="./static/favicon.ico">
+	<meta name="viewport" content="width = device-width, initial-scale=1, user-scalable = no" />
+	<link href="https://tools-static.wmflabs.org/fontcdn/css?family=Merriweather:400,400italic,700,700italic&subset=latin" rel="stylesheet" type="text/css">
+	<link href='https://tools-static.wmflabs.org/fontcdn/css?family=Lato:400,400italic,700,700italic&subset=latin' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" href="./static/style.css" />
+	<style>
+      .above-threshold {color: black;}
+      .below-threshold {color: silver;}
+      /*p { text-indent: 30px; }*/
+    </style>
+
+</head>
+
+<body>
+	<script type="text/javascript">
+		var body = document.body;
+		body.classList.add('js');
+	</script>
+
+	<div id="origin_bar">
+		<div class="boxwidth--1-1 padded--left padded--right">
+			<a href="https://research.wikimedia.org/" class="origin_title"><img src="./static/Wikimedia-Foundation-logo.svg" alt="Wikimedia Foundation logo" />Wikimedia Research</a>
+		</div>
+	</div>
+
+	<article id="tool_holder">
+		<!-- Header / Start -->
+		<div id="tool_header--holder" class="boxwidth--1-1 padded--left padded--right">
+			<header id="tool_header">
+				<!-- Tool name -->
+				<h1>Reader topic model</h1>
+				<div class="meta">
+					<div class="disclaimer note">
+						No guarantees are made that this tool will be maintained.
+						This is an experimental tool hosted on <a href="https://wikitech.wikimedia.org/wiki/Portal:Toolforge">Toolforge</a>. 
+						No additional personal data is collected by this tool per the Cloud Services
+							<a href="https://wikitech.wikimedia.org/wiki/Wikitech:Cloud_Services_Terms_of_use" target="_blank" rel="noopener">Terms of Use</a>.
+					</div>
+					<div class="description padded--right">
+						<p>	This tool aims to help identifying articles in Wikipedia related to a given topic. For example, a person interested in <a href="https://en.wikipedia.org/wiki/Climate_change">Climate change</a> would want to get a list of articles that are related to that topic.</p>
+						<p> Existing approaches to this problem typically look at the text or the links in a wiki (such as the  <a href="https://www.mediawiki.org/wiki/Help:CirrusSearch#Morelike">morelike</a>-search). In this approach we generate the list of related articles based on their relevance to readers of Wikipedia. Specifically, using data from traffic on Wikipedia and methods from machine learning, we try to identify those articles that are read in the context of the topic of interest.</p>
+				  		<p>One of the main advantages of this approach is that it is independent of any language. This works by mapping articles to their corresponding Wikidata-item (<a href="https://github.com/martingerlach/coverage-wikipedia-wikidata">almost all of them</a> have a Wikidata item ). This allows us to aggregate articles from all wikis. More details can be found <a href="https://meta.wikimedia.org/wiki/User:MGerlach_(WMF)/covid_related_pages_reading_sessions">here</a>.</p>
+
+						<p>You can try this tool below.</p> 
+
+						<!-- </p> -->
+						<!-- <p>	  </p> -->
+					</div>
+				</div>
+			</header>
+		</div>
+
+		<div class="separator"></div>
+
+		<main id="tool_main">
+			<section id="wikidata-model" class="boxwidth--1-1 padded--left padded--right">
+				<h2>Finding related items and articles</h2>
+				<section class="text">
+				  <p>Start with a seed-article in the form of its Wikidata item -- for example, with <a href="	">Tim Maia (Q1262590)</a>. The API below will give you a list of the most-related Wikipedia-articles in the form of their Wikidata-item, its label (if available), and a similarity score (0-low to 1-high).  <a href="https://reader.wmcloud.org/api/v1/reader?qid=Q1262590">Example-query</a>. </p>
+				  <p>If you are interested whether a Wikipedia-article exists in specific language(s), enter the corresponding language codes, e.g. "en" or "en|pt". This might allow you to find articles that are missing in a given language (but exist in another)</p>
+				</section>
+				<section class="form">
+					<form action="#wikidata-model">
+						<div class="cols cols3">
+							<div class="col col1">
+								<label class="placeholder"><span class="field_name">Wikidata item ID -- e.g., Q1262590</span>
+									<input type="text" value="" placeholder="Placeholder text" id="wikidata-id"/>
+								</label>
+							</div>
+							<div class="col col1">
+								<label class="placeholder"><span class="field_name">check for articles in language -- e.g., en or en|pt</span>
+									<input type="text" value="" placeholder="Placeholder text" id="lang"/>
+								</label>
+							</div>
+
+							<div class="col col1">
+								<span class="field_name"></span>
+								<input type="submit" value="Submit" id="wdBtnSubmit" />
+							</div>
+						</div>
+					</form>
+				</section>
+				<!-- Empty section to hold results -->
+				<section class="text" id="wikidata-based-results">
+				</section>
+			</section>
+
+			</section>
+		</main>
+	</article>
+
+	<footer id="tool_footer">
+		<div id="tool_footer-in" class="boxwidth--1-1 padded--left padded--right">
+			<p>Experimental tool developed by <span class="tool-author"><a href="https://meta.wikipedia.org/wiki/User:MGerlach_(WMF)">MGerlach (WMF)</a> as part of <a href="https://research.wikimedia.org/">Wikimedia Research</a></span>.</p>
+			<ul>
+				<li><a href="https://github.com/martingerlach/reader-embedding-api">View Source</a></li>
+				<li><a href="https://meta.wikimedia.org/wiki/User:MGerlach_(WMF)/covid_related_pages_reading_sessions">Meta</a></li>
+				<li><a href="https://github.com/martingerlach/reader-embedding-api#license">License</a></li>
+			</ul>
+		</div>
+	</footer>
+
+
+	<script type="text/javascript" src="https://tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.5.0/jquery.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$('form label.placeholder').each(function() {
+				$(this).addClass('off');
+				$(this).on('focusin', function() {
+					$(this).removeClass('off');
+				});
+				$(this).on('focusout', function() {
+					if (!$('input, textarea, select', this).val()) {
+						$(this).addClass('off');
+					}
+				});
+				$('*[placeholder]', this).attr('placeholder', '');
+			});
+		});
+
+	</script>
+
+	<script type="text/javascript">
+		$('#wdBtnSubmit').click(function (e) {
+		   e.preventDefault(); queryWikidataBasedAPI();
+		});
+
+
+		var render_categories_wd = function(data) {
+			$("#wikidata-based-results").empty();
+			if ("Error" in data) {
+				$("#wikidata-based-results").append("<br><p>Error: " + data["Error"] + "</p>");
+			}
+			else {
+
+				for (var item in data) {
+					if (data[item]["score"]==1){
+						$("#wikidata-based-results").append('<br><h3><a href="https://wikidata.org/wiki/' + data[item]["qid"] + '">' + data[item]["qid"] + '</a> (' + data[item]["label"] + ')</h3>');
+						$("#wikidata-based-results").append("<ul>");
+					}
+					else {
+						$("#wikidata-based-results").append("<li><a href='https://www.wikidata.org/wiki/" + data[item]["qid"] +"'>"+data[item]["qid"]+"</a> "+ data[item]["label"]  +" (" + Math.round(data[item]["score"]*100)/100 + ")</li>");
+
+						for (var lang in data[item]["articles"]) {
+							if (data[item]["articles"][lang] == "-") {
+
+								$("#wikidata-based-results").append("&nbsp;&nbsp;&nbsp;&nbsp; &#8594;"+lang+": <i>no article yet</i><br>");
+							}
+							else {
+								$("#wikidata-based-results").append("&nbsp;&nbsp;&nbsp;&nbsp; &#8594;"+lang+": <a href='https://"+lang.slice(0,2)+".wikipedia.org/wiki/"+data[item]["articles"][lang]+"'>"+data[item]["articles"][lang]+"</a><br>");
+							}
+						}
+					}
+				$("#wikidata-based-results").append("</ul>");
+				}
+			}
+				
+		}
+
+		function queryWikidataBasedAPI() {
+			// var queryUrl = "https://reader.wmcloud.org/api/v1/reader?qid=" + document.getElementById('wikidata-id').value;
+			var queryUrl = "http://127.0.0.1:5000/api/v1/reader/nn?qid=" + document.getElementById('wikidata-id').value+"&lang=" + document.getElementById('lang').value;
+
+			$.ajax(queryUrl, {success: render_categories_wd.bind(this),
+							  error: function(jqxmlhr, status, error){console.log(status + ": " + error)}
+							  }
+				  );
+	    }
+
+	</script>
+
+</body>
+
+</html>

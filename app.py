@@ -1,34 +1,39 @@
+# Many thanks to: https://wikitech.wikimedia.org/wiki/Help:Toolforge/My_first_Flask_OAuth_tool
+
 import os
-import sys
-import json
-import requests
-import re
+import yaml
+
 from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
+import requests
 import numpy as np
 import math
-
-'''
-This API finds nearest neighbors of wikidata-items based on embeddings obtained from reading sessions.
-The actual model is hoted on cloud-vps (due to memory requirements).
-we thus make a query to https://reader.wmcloud.org/api/v1/reader?qid=Q81068910
-'''
-
+import re
+import json
 
 app = Flask(__name__)
-app.config["DEBUG"] = True
-app.config['JSON_SORT_KEYS'] = False
-CUSTOM_UA = 'reader session app -- mgerlach@wikimedia.org'
-## cheap hack to get list of possible languages
+
+__dir__ = os.path.dirname(__file__)
+app.config.update(
+    yaml.safe_load(open(os.path.join(__dir__, 'default_config.yaml'))))
+try:
+    app.config.update(
+        yaml.safe_load(open(os.path.join(__dir__, 'config.yaml'))))
+except IOError:
+    # It is ok if there is no local config file
+    pass
+
+# Enable CORS for API endpoints
+#CORS(app, resources={'*': {'origins': '*'}})
+CORS(app)
+
 languages = requests.get('https://cxserver.wikimedia.org/v1/languagepairs').json()['source']
 
-## load embedding
-print("Try: http://127.0.0.1:5000/api/v1/reader/nn?qid=Q81068910")
-print("or : http://127.0.0.1:5000/api/v1/reader/nn?qid=Q81068910&n=100&lang=en|de&threshold=0.5&showurl=True")
-# print("or : http://127.0.0.1:5000/api/v1/reader/nn?qid=Q81068910&n=20&lang=en|de&filter=corona|covid&threshold=0.5&showurl=True")
 
 @app.route('/')
 def index():
-    return 'Server Works!'
+    return render_template('index.html')
+
 
 @app.route('/api/v1/reader/nn', methods=['GET'])
 def get_recommendations():
@@ -45,7 +50,7 @@ def get_recommendations():
         ## add label and titles for some wikis
         result = add_article_titles(result,list_wikis=lang)
         ##filters
-        result = filter_items_notext(result)
+        # result = filter_items_notext(result)
         result = filter_items_disambiguation(result)
         result = filter_items_str(result,list_keywords = filterStr)
 
@@ -66,7 +71,7 @@ def parse_args(request):
     Parse api query parameters 
     """
     ## number of neighbors
-    n_default = 10 ## default number of neighbors
+    n_default = 20 ## default number of neighbors
     n_max = 100 ## maximum number of numbers (even if submitted argument is larger)
     n = request.args.get('n',n_default)
     try:
@@ -245,7 +250,42 @@ def filter_items_str(
         return list_items_new
 
 
-if __name__ == '__main__':
-    '''
-    '''
-    app.run(host='0.0.0.0')
+# @app.route('/api/v1/reader/nn', methods=['GET'])
+# def get_recommendations():
+#     qid = request.args.get('qid').upper()
+#     result = recommend(qid)
+#     ## keep only some specific fields
+#     result_formatted = [ {'qid': r['qid'],'score':r['score'] }  for r in result]
+#     try:
+#         return jsonify(result_formatted)
+#     except:
+#         return jsonify({'Error':qid})
+
+# def recommend(qid, nn = 10, threshold = 0.):
+#     """
+#     get nn closest qids in emebdding space.
+#     We call the API-endpoint
+#     """
+#     # recs = FT_MODEL.get_nearest_neighbors(qid,k=nn)
+#     # result = [{'qid':qid,'score':1.}]
+#     # result += [{ 'qid':r[1],'score':r[0]} for r in recs if r[0]>threshold]
+#     api_url_base = 'https://reader.wmcloud.org/api/v1/reader'
+#     params = {
+#         "qid": qid,
+#         "n": nn,
+#         "format": "json",
+#     }
+#     recs = requests.get( api_url_base,params=params).json()
+#     ## add the other items if they exceed the threshold
+#     result = [r for r in recs if r['score']>threshold]
+#     return result
+
+# @app.route('/comparison')
+# def comparison():
+#     return render_template('comparison.html')
+
+# @app.route('/countries')
+# def countries():
+#     return render_template('countries.html')
+
+

@@ -1,8 +1,14 @@
 # reader-embedding-api
+Toolforge interface to allow users to explore articles related to a given topic based on reader interest on Wikipedia articles.
 
-API to find similar wikidata-items (and their corresponding articles) in embedding space constructed from reading sessions.
+UI based on the following template: https://github.com/wikimedia/research-api-interface-template
 
-## Usage
+## Endpoints
+* <https://reader.toolforge.org/>: individual interface for viewing related articles.
+
+
+* <https://reader.toolforge.org/api/v1/reader/nn>: API-access point with more options
+
 
 Possible arguments:
 - qid: wikidata item ot query; example:qid=Q81068910 (required)
@@ -22,3 +28,9 @@ https://reader.toolforge.org/api/v1/reader/nn?qid=Q81068910
 ## Additional notes
 
 ```./code``` contains the scripts to generate the embedding. The actual trained model is hosted on cloud-vps due to memory-requirements. Thus, here we point to that endpoint.
+
+
+## License
+The source code for this interface is released under the [MIT license](https://github.com/martingerlach/reader-embedding-api/blob/master/LICENSE).
+
+Screenshots of the results in the API may be used without attribution, but a link back to the application would be appreciated.
