@@ -62,7 +62,7 @@
 			<section id="wikidata-model" class="boxwidth--1-1 padded--left padded--right">
 				<h2>Finding related items and articles</h2>
 				<section class="text">
-				  <p>Start with a seed-article in the form of its Wikidata item -- for example, with <a href="	">Tim Maia (Q1262590)</a>. The API below will give you a list of the most-related Wikipedia-articles in the form of their Wikidata-item, its label (if available), and a similarity score (0-low to 1-high).  <a href="https://reader.wmcloud.org/api/v1/reader?qid=Q1262590">Example-query</a>. </p>
+				  <p>Start with a seed-article in the form of its Wikidata item -- for example, with <a href="https://www.wikidata.org/wiki/Q1262590">Tim Maia (Q1262590)</a>. The API below will give you a list of the most-related Wikipedia-articles in the form of their Wikidata-item, its label (if available), and a similarity score (0-low to 1-high).  <a href="https://reader.wmcloud.org/api/v1/reader?qid=Q1262590">Example-query</a>. </p>
 				  <p>If you are interested whether a Wikipedia-article exists in specific language(s), enter the corresponding language codes, e.g. "en" or "en|pt". This might allow you to find articles that are missing in a given language (but exist in another)</p>
 				</section>
 				<section class="form">
@@ -164,9 +164,8 @@
 		}
 
 		function queryWikidataBasedAPI() {
-			// var queryUrl = "https://reader.wmcloud.org/api/v1/reader?qid=" + document.getElementById('wikidata-id').value;
+			// var queryUrl = "https://reader.toolforge.org/api/v1/reader/nn?qid=" + document.getElementById('wikidata-id').value+"&lang=" + document.getElementById('lang').value;
 			var queryUrl = "http://127.0.0.1:5000/api/v1/reader/nn?qid=" + document.getElementById('wikidata-id').value+"&lang=" + document.getElementById('lang').value;
-
 			$.ajax(queryUrl, {success: render_categories_wd.bind(this),
 							  error: function(jqxmlhr, status, error){console.log(status + ": " + error)}
 							  }
