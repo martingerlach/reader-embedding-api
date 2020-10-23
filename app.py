@@ -263,14 +263,14 @@ def filter_items_str(
                 list_items_new += [item]
         return list_items_new
 
-def getTopic(qid,p_min=0.5):
+def getTopic(qid,p_min=0.2):
     '''
     get the topic from the wikidata-topic tool
     '''
     api_url_base = 'https://wikidata-topic.wmcloud.org/api/v1/topic'
     params = {
         'qid':qid,
-         'threshold':0.5
+         'threshold':0.1
     }
     ## query api: https://tools.wmflabs.org/wiki-topic/
     response = requests.get( api_url_base,params=params)
@@ -279,12 +279,15 @@ def getTopic(qid,p_min=0.5):
     scores = [h['score'] for h in result['results']]
     topics = [h['topic'] for h in result['results']]
     ## get topic w maximum probability (if p exceeds p_min)
-    ind_max = np.argmax(scores)
-    score_max = scores[ind_max]
-    if score_max >= p_min:
-        topic = topics[ind_max]
-    else:
+    if len(scores)==0:
         topic = '-'
+    else:
+        ind_max = np.argmax(scores)
+        score_max = scores[ind_max]
+        if score_max >= p_min:
+            topic = topics[ind_max]
+        else:
+            topic = '-'
     return topic
 
 def items_addTopics(list_items):
