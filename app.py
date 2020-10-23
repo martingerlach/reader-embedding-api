@@ -44,6 +44,7 @@ def get_recommendations():
     filterStr = args['filter'] ## filter any items which contain these strings in their labels
     threshold = args['threshold'] ## minimimum threshold for similarity score (default 0)
     showUrl = args['showurl'] ## show titles with urls for easy exploration
+    topics = args['topics']
 
     if validate_qid_format(qid):
         result = recommend(qid,nn = n, threshold = threshold)
@@ -53,13 +54,18 @@ def get_recommendations():
         # result = filter_items_notext(result)
         result = filter_items_disambiguation(result)
         result = filter_items_str(result,list_keywords = filterStr)
+        if topics == True:
+            result = items_addTopics(result)
 
         ## add urls for easier access
         if showUrl == True:
             result = add_urlsToTitles(result)
 
         ## keep only some specific fields
-        result_formatted = [ {'qid': r['qid'], 'label':r['label'], 'score':r['score'], 'articles':r['titles'],  }  for r in result]
+        if topics == True:
+            result_formatted = [ {'qid': r['qid'], 'label':r['label'], 'topic':r['topic'], 'score':r['score'], 'articles':r['titles'],  }  for r in result]
+        else:
+            result_formatted = [ {'qid': r['qid'], 'label':r['label'], 'score':r['score'], 'articles':r['titles'],  }  for r in result]
 
         return jsonify(result_formatted)
     return jsonify({'Error':qid})
@@ -102,7 +108,14 @@ def parse_args(request):
     if showUrl.lower() == 'true':
         showUrl = True
     else:
-        False
+        showUrl = False
+
+    topics = request.args.get('topics','')
+    if topics.lower() == 'true':
+        topics = True
+    else:
+        topics = False
+
     # print(bool(showUrl))
     filter_arg = request.args.get('filter','')
     filterStr = []
@@ -116,7 +129,8 @@ def parse_args(request):
                 'lang':wikis,
                 'threshold': float(threshold),
                 'showurl':showUrl,
-                'filter':filterStr
+                'filter':filterStr,
+                'topics':topics
             }
 
     return args
@@ -249,3 +263,33 @@ def filter_items_str(
                 list_items_new += [item]
         return list_items_new
 
+def getTopic(qid,p_min=0.5):
+    '''
+    get the topic from the wikidata-topic tool
+    '''
+    api_url_base = 'https://wikidata-topic.wmcloud.org/api/v1/topic'
+    params = {
+        'qid':qid,
+         'threshold':0.5
+    }
+    ## query api: https://tools.wmflabs.org/wiki-topic/
+    response = requests.get( api_url_base,params=params)
+    result=json.loads(response.text)   
+    ## get scores (topic-probabilities) and topics
+    scores = [h['score'] for h in result['results']]
+    topics = [h['topic'] for h in result['results']]
+    ## get topic w maximum probability (if p exceeds p_min)
+    ind_max = np.argmax(scores)
+    score_max = scores[ind_max]
+    if score_max >= p_min:
+        topic = topics[ind_max]
+    else:
+        topic = '-'
+    return topic
+
+def items_addTopics(list_items):
+    for i_item,item in enumerate(list_items):
+        qid = item['qid']
+        topic = getTopic(qid)
+        list_items[i_item]['topic'] = topic
+    return list_items
